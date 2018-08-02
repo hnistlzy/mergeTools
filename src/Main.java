@@ -14,39 +14,27 @@ public class Main {
      * 默认认为输入的这一组数据都为同一个格式
      * @param path  地址数组
      */
-    private int readFiles(String ...path){
-        int status=0;
+    private File readFiles(String ...path){
+        File file ;
         String str=path[0];
         if(str.contains(".xlsx")){
-            status=1;
+             file = new File("D:\\aaa.xlsx");
+        }else{
+            file = new File("D:\\aaa.xls");
         }
-        return  status;
+        return  file;
+
 }
     public static void main(String[] args) {
-//        MergeXlsx mergeXls = new MergeXlsx();
-//        XSSFWorkbook targetWb = new XSSFWorkbook();
-//        XSSFWorkbook resultWB = mergeXls.mergeXSSF(targetWb, "buglist", "D:\\升级.xlsx", "D:\\麻将.xlsx");
-//        File file = new File("D:\\3.xls");
-//        try  {
-//            FileOutputStream fileOutputStream = new FileOutputStream(file);
-//            resultWB.write(fileOutputStream);
-//            fileOutputStream.close();
-//        }catch (FileNotFoundException e){
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
         MergeAction mergeAction = new MergeAction();
         Main main = new Main();
-        int status = main.readFiles("D:\\麻将.xlsx");
-        File file = new File("D:\\1.xlsx");
+        File resultFile = main.readFiles("D:\\1.xls");
         FileOutputStream fileOutputStream;
         try{
-            fileOutputStream = new FileOutputStream(file);
-            if(status==0){
+            fileOutputStream = new FileOutputStream(resultFile);
+            if(!resultFile.getName().contains(".xlsx")){
                 HSSFWorkbook hssfWorkbook = new HSSFWorkbook();
-                HSSFWorkbook bug = mergeAction.mergeHSSF(hssfWorkbook, "bug", "D:\\麻将.xlsx", "D:\\升级.xlsx");
+                HSSFWorkbook bug = mergeAction.mergeHSSF(hssfWorkbook, "bug", "D:\\1.xls", "D:\\2.xls");
                 bug.write(fileOutputStream);
                 fileOutputStream.close();
             }else {
