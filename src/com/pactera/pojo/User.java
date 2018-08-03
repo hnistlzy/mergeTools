@@ -1,12 +1,17 @@
 package com.pactera.pojo;
 
+
+
+
+
+
 public class User  {
-   private String username;
+    private String username;
     private String bugName;
     private String date;
-    private  String severity;
+    private String severity;
     private String testWay;
-
+public User(){}
     public String getUsername() {
         return username;
     }
@@ -45,5 +50,6 @@ public class User  {
 
     public void setTestWay(String testWay) {
         this.testWay = testWay;
-    }
-}
+    }}
+
+

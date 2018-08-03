@@ -4,11 +4,11 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class MergeService {
+ class MergeService {
     private MergeService(){}
     private static MergeService mergeService=null;
     static MergeService getMergeService(){
@@ -29,11 +29,9 @@ public class MergeService {
     /**
      *  给目标sheet设置title
      * @param targetSheet 目标sheet
-     * @param titleFile 获取title的文件
+     * @param titleFile 获取title的文件的第一个sheet的title
      * @throws IOException IO异常
      */
-
-
     void setTargetSheetTitle(XSSFSheet targetSheet, File titleFile) throws IOException {
         InputStream titleIn = new FileInputStream(titleFile);
         XSSFWorkbook titleWB = new XSSFWorkbook(titleIn); //获取源文件的sheet
@@ -47,7 +45,7 @@ public class MergeService {
         while(firstCellNum<lastCellNum){
             XSSFCell targetCell = targetSheetRow.createCell(firstCellNum);
             XSSFCell sourceCell = titleWBRow.getCell(firstCellNum);
-            setTargetCellValue(sourceCell,targetCell);
+            setTargetCellValue(sourceCell,targetCell,null);
             firstCellNum++;
         }
         System.out.println("title设置成功");
@@ -60,6 +58,7 @@ public class MergeService {
      * @throws IOException IO异常
      */
     void setTargetSheetTitle(HSSFSheet targetSheet, File titleFile) throws  IOException {
+        System.out.println(titleFile.getName()+","+titleFile.getPath());
         InputStream titleIn = new FileInputStream(titleFile);
         HSSFWorkbook titleWB = new HSSFWorkbook(titleIn); //获取源文件的sheet
         HSSFRow titleWBRow = titleWB.getSheetAt(0).getRow(0); //获取第一行
@@ -94,6 +93,7 @@ public class MergeService {
                 break;
             case HSSFCell.CELL_TYPE_FORMULA: //公式
                 //targetCell.setCellValue(sourceCell.getCellFormula()); 获取公式
+
                 targetCell.setCellValue(sourceCell.getCachedFormulaResultType());  //公式的返回值
                 break;
             case HSSFCell.CELL_TYPE_NUMERIC: //包含日期处理的情况，可能会出问题
@@ -119,7 +119,7 @@ public class MergeService {
                 break;
         }
     }
-    private void setTargetCellValue(XSSFCell sourceCell, XSSFCell targetCell) {
+    private void setTargetCellValue(XSSFCell sourceCell, XSSFCell targetCell, XSSFFormulaEvaluator formulaEvaluator) {
         switch (sourceCell.getCellType()){
             case XSSFCell.CELL_TYPE_STRING: //字符串
                 targetCell.setCellValue(sourceCell.getStringCellValue());
@@ -135,7 +135,14 @@ public class MergeService {
                 break;
             case XSSFCell.CELL_TYPE_FORMULA: //公式
                 //targetCell.setCellValue(sourceCell.getCellFormula()); 获取公式
-                targetCell.setCellValue(sourceCell.getCachedFormulaResultType());  //公式的返回值
+                CellValue evaluate = formulaEvaluator.evaluate(sourceCell);
+                Double numberValue = evaluate.getNumberValue();
+                int s = numberValue.intValue();
+                System.out.println("公式的值："+numberValue);
+//                String s = String.valueOf(numberValue);
+                targetCell.setCellValue(s);
+                //公式的返回值
+//                targetCell.setCellValue(sourceCell.getCachedFormulaResultType());  //公式的返回值
                 break;
             case XSSFCell.CELL_TYPE_NUMERIC: //包含日期处理的情况，可能会出问题
                 short format = sourceCell.getCellStyle().getDataFormat();
@@ -195,7 +202,7 @@ public class MergeService {
 
 
     }
-    void copySheet(XSSFSheet sourceSheet, XSSFSheet targetSheet) {
+    void copySheet(XSSFSheet sourceSheet, XSSFSheet targetSheet, XSSFFormulaEvaluator formulaEvaluator) {
         //总是往目标的最后一行 的 下一行添加数据
         int lastRowNum = targetSheet.getLastRowNum();
         System.out.println("目标sheet的最后一行是："+lastRowNum);
@@ -219,7 +226,7 @@ public class MergeService {
                 if(sourceCell==null){
                     targetCell.setCellValue("0");
                 }else{
-                    setTargetCellValue(sourceCell,targetCell);
+                    setTargetCellValue(sourceCell,targetCell,formulaEvaluator);
                 }
 
             }

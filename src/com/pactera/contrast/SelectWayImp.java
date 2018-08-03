@@ -1,14 +1,15 @@
 package com.pactera.contrast;
 
 import com.pactera.pojo.User;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Iterator;
 
 public class SelectWayImp implements SelectBehavior {
     private User user ;
@@ -20,20 +21,30 @@ public class SelectWayImp implements SelectBehavior {
             XSSFWorkbook  wb= new XSSFWorkbook(in);
             int num = wb.getNumberOfSheets();
             getWeeklyValue(wb,1,6);
+            //通过反射获得属性名
+            //map<string,string>  <属性名，值>
+            //list<map>
+            //user.setvalue(map.getvalue())
             while(num>0){
-                XSSFSheet sheetAt = wb.getSheetAt(num);
-                int firstRowNum = sheetAt.getFirstRowNum();
-                int lastRowNum = sheetAt.getLastRowNum();
-                for(;firstRowNum<=lastRowNum;firstRowNum++){
-                    XSSFRow row = sheetAt.getRow(firstRowNum);
-                    int firstCellNum = (int)row.getFirstCellNum();
-                    int lastCellNum = (int)row.getLastCellNum();
-                    for(;firstCellNum<=lastCellNum;firstCellNum++){
-                        user =new User();
-                        XSSFCell cell = row.getCell(firstCellNum);
-                        getCellValue(cell);
-                    }
-                }
+                XSSFSheet sheet = wb.getSheetAt(num);
+                Iterator<Row> itr = sheet.iterator();
+//                while(itr.hasNext()){
+//                    User user = new User();
+//                    Row next = itr.next();
+//
+//                }
+//                int firstRowNum = sheetAt.getFirstRowNum();
+//                int lastRowNum = sheetAt.getLastRowNum();
+//                for(;firstRowNum<=lastRowNum;firstRowNum++){
+//                    XSSFRow row = sheetAt.getRow(firstRowNum);
+//                    int firstCellNum = (int)row.getFirstCellNum();
+//                    int lastCellNum = (int)row.getLastCellNum();
+//                    for(;firstCellNum<=lastCellNum;firstCellNum++){
+//                        user =new User();
+//                        XSSFCell cell = row.getCell(firstCellNum);
+//                        getCellValue(cell);
+//                    }
+//                }
                 num--;
             }
         }else if(file.getName().contains("BugList")&& str.equals("BugList")){
