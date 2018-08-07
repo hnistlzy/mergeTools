@@ -50,9 +50,9 @@ public class MergePlus {
      * 根据文件的后缀名来判断创建哪种对象
      * @param file 文件，
      * @param status 是否读入文件，>0 读入文件，==0不读入文件，只根据文件名返回wb
-     * @return
-     * @throws FileReadException
-     * @throws IOException
+     * @return workbook
+     * @throws FileReadException 自定义异常
+     * @throws IOException IO异常
      */
     public Workbook excelEndWith(File file,Integer status) throws FileReadException,IOException {
         Workbook workbook;
