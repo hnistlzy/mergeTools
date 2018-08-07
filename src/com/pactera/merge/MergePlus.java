@@ -108,6 +108,12 @@ public class MergePlus {
 
     }
 
+    /**
+     *  复制整个sheet
+     * @param sourceSheet 源sheet
+     * @param targetSheet 目标sheet
+     * @return 是否成功
+     */
     public boolean copySheet(Sheet sourceSheet, Sheet targetSheet) {
         System.out.println("当前目标sheet的名字是："+targetSheet.getSheetName());
        int lastRowNum = targetSheet.getLastRowNum();
@@ -141,6 +147,13 @@ public class MergePlus {
        return false;
    }
 
+    /**
+     *  复制cell中的值到targetCell
+     * @param sourceCell 源cell
+     * @param targetCell 目标cell
+     * @param formulaEvaluator xx
+     * @return 是否复制成功
+     */
     public boolean copyCell(Cell sourceCell, Cell targetCell, FormulaEvaluator formulaEvaluator) {
        boolean bool=false;
         switch (sourceCell.getCellType()){
@@ -175,6 +188,14 @@ public class MergePlus {
 
     }
 
+    /**
+     *  格式化日期类型
+     * @param targetCell  目标cell
+     * @param dataFormat dataFormat
+     * @param value sourceCell的值
+     * @param dateFormat dateFormat
+     * @param timeFormat timeFormat
+     */
     private void numberOfDate(Cell targetCell, short dataFormat, double value, String dateFormat, String timeFormat) {
         SimpleDateFormat sdf ;
         if (dataFormat == 14 || dataFormat == 31 || dataFormat == 57 || dataFormat == 58
