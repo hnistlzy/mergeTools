@@ -32,8 +32,39 @@ public class MergeAction {
                 }
                 num--;
             }
-
         }
         return targetWorkbook;
+    }
+    public Workbook mergeLastSheet(Workbook targetWorkbook, File[] sourceFiles)throws IOException,FileReadException{
+        Sheet targetSheet = targetWorkbook.createSheet();
+        Workbook workbook = mergePlus.excelEndWith(sourceFiles[0], 1);
+        int num = workbook.getNumberOfSheets();
+        Sheet sheet = workbook.getSheetAt(num - 1);
+        while(sheet.getLastRowNum()<=0){
+            num--;
+            sheet=workbook.getSheetAt(num-1);
+        }
+        if(num>0){
+            mergePlus.copyFirstRow(sheet,targetSheet);
+        }
+
+        for(File files:sourceFiles){
+            Workbook sourceWB = mergePlus.excelEndWith(files, 1);
+            int number = sourceWB.getNumberOfSheets();
+            Sheet sourceSheet = sourceWB.getSheetAt(number - 1);
+            while(sourceSheet.getLastRowNum()<=0){
+                number--;
+                //最后一个sheet为空的话，更新sourceSheet
+                sourceSheet=sourceWB.getSheetAt(number-1);
+            }
+            if(number>0){
+                mergePlus.copySheet(sourceSheet, targetSheet);
+            }else{
+                throw new FileReadException("要读取的excel文件不能为空！！！");
+            }
+        }
+        return targetWorkbook;
+
+
     }
 }

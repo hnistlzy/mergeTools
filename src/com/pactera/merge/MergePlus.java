@@ -1,9 +1,10 @@
 package com.pactera.merge;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.Region;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -92,7 +93,6 @@ public class MergePlus {
      * */
     public void copyFirstRow(Sheet targetSheet, File sourceFile,int sheetAt) throws IOException, FileReadException {
         Workbook sourceWorkbook = excelEndWith(sourceFile,1);
-
         Sheet sourceSheet = sourceWorkbook.getSheetAt(sheetAt);
         if(sourceSheet.getLastRowNum()>0){
             Row sourceRow = sourceSheet.getRow(0);
@@ -102,11 +102,30 @@ public class MergePlus {
             FormulaEvaluator formulaEvaluator = sourceWorkbook.getCreationHelper().createFormulaEvaluator();
             for(;firstCellNum<lastCellNum;firstCellNum++){
                 Cell targetCell = targetRow.createCell(firstCellNum);
+
                 copyCell(sourceRow.getCell(firstCellNum),targetCell,formulaEvaluator);
+                copyStyle(sourceRow.getCell(firstCellNum),targetCell);
+
             }
         }
 
     }
+  public void copyFirstRow(Sheet sourceSheet,Sheet targetSheet){
+        if(sourceSheet.getLastRowNum()>0){
+            Row sourceRow = sourceSheet.getRow(0);
+            int firstCellNum = sourceRow.getFirstCellNum();
+            int lastCellNum = sourceRow.getLastCellNum();
+            Row targetRow = targetSheet.createRow(0);
+            FormulaEvaluator formulaEvaluator = sourceSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+            for(;firstCellNum<lastCellNum;firstCellNum++){
+                Cell targetCell = targetRow.createCell(firstCellNum);
+
+                copyCell(sourceRow.getCell(firstCellNum),targetCell,formulaEvaluator);
+                copyStyle(sourceRow.getCell(firstCellNum),targetCell);
+
+            }
+        }
+        }
 
     /**
      *  复制整个sheet
@@ -122,7 +141,6 @@ public class MergePlus {
        int firstNum = sourceSheet.getFirstRowNum()+1;
        int lastNum = sourceSheet.getLastRowNum();
        System.out.println("当前文件的首行是："+(firstNum)+"末行是:"+lastNum+"一共要读取"+(lastNum-firstNum+1)+"行数据");
-
        for(;firstNum<=lastNum;firstNum++){
            System.out.println("正在复制第"+firstNum+"行数据");
            //获取第一列 和最后一列的列号.
@@ -135,6 +153,7 @@ public class MergePlus {
                Cell sourceCell = sourceSheet.getRow(firstNum).getCell(firstCellNum);
                FormulaEvaluator formulaEvaluator = sourceSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
                if(sourceCell!=null){
+                   copyStyle(sourceCell,targetRowCell);
                    copyCell(sourceCell,targetRowCell,formulaEvaluator);
                }else{
                    targetRowCell.setCellValue(" ");
@@ -146,7 +165,6 @@ public class MergePlus {
 
        return false;
    }
-
     /**
      *  复制cell中的值到targetCell
      * @param sourceCell 源cell
@@ -215,5 +233,56 @@ public class MergePlus {
         }
     }
 
+    /**
+     *  将目录下的所有文件的所有sheet，复制到同一文件的不同sheet中
+     * @param sourceFiles 文件数组
+     * @param targetWorkbook 目标excel文件
+     * @throws IOException IO
+     * @throws FileReadException FileReadException
+     */
+    public void copyAllFileToMutiSheet(File[] sourceFiles,Workbook targetWorkbook)throws IOException,FileReadException{
+        for(File sourceFile:sourceFiles){
+            Workbook sourceWorkbook = excelEndWith(sourceFile,1);
+            //swb有几个sheet全部复制到，targetWB中
+            int num = sourceWorkbook.getNumberOfSheets();
+            while(num>0){
+                Sheet targetSheet = targetWorkbook.createSheet();
+                Sheet sourceSheet = sourceWorkbook.getSheetAt(num - 1);
+                if(sourceSheet.getLastRowNum()>0){
+                    copySheet(sourceSheet, targetSheet);
+                }
+                num--;
+            }
+        }
+    }
+    public void copyStyle(Cell sourceCell,Cell targetCell){
+        CellStyle sourceStyle = sourceCell.getCellStyle();
+        CellStyle targetStyle = targetCell.getCellStyle();
+        //居中
+        targetStyle.setAlignment(sourceStyle.getAlignment());
+        targetStyle.setVerticalAlignment(sourceStyle.getVerticalAlignment());
+        //边框样式
+        targetStyle.setBorderBottom(sourceStyle.getBorderBottom());
+        targetStyle.setBorderLeft(sourceStyle.getBorderLeft());
+        targetStyle.setBorderRight(sourceStyle.getBorderRight());
+        targetStyle.setBorderTop(sourceStyle.getBorderTop());
+        //边框颜色
+        targetStyle.setBottomBorderColor(sourceStyle.getBottomBorderColor());
+        targetStyle.setTopBorderColor(sourceStyle.getTopBorderColor());
+        targetStyle.setLeftBorderColor(sourceStyle.getLeftBorderColor());
+        targetStyle.setRightBorderColor(sourceStyle.getRightBorderColor());
+        //底色
+        targetStyle.setFillBackgroundColor(sourceStyle.getFillBackgroundColor());
+        //前景色？
+        targetStyle.setFillForegroundColor(sourceStyle.getFillForegroundColor());
+        targetStyle.setFillPattern(sourceStyle.getFillPattern());
+        //杂项
+        targetStyle.setDataFormat(sourceStyle.getDataFormat());
+        targetStyle.setHidden(sourceStyle.getHidden());
+        targetStyle.setLocked(sourceStyle.getLocked());
+        targetStyle.setIndention(sourceStyle.getIndention());
+        targetStyle.setRotation(sourceStyle.getRotation());
+        targetStyle.setWrapText(sourceStyle.getWrapText());
+    }
 
 }
